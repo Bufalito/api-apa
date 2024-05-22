@@ -12,7 +12,7 @@ const { checkOrigin } = require("../middlewares/origin");
 
 //router.get("", checkOrigin, getList);
 router.post("", createOrderController);
-router.get("/succes", succesOrderController);
+router.get("/success", succesOrderController);
 router.get("/failure", failureOrderController);
 router.get("/pending", pendingOrderController);
 

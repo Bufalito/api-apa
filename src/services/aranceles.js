@@ -1,14 +1,22 @@
-const { MercadoPagoConfig, Preference } = require("mercadopago");
+require("dotenv").config();
+const { MOCKE_ARANCELES } = require("../models/aranceles");
+const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
+const { senMail } = require("../config/mailer");
+
+const URL_API_MP = process.env.URL_API_MP;
+const URL_API_DESARROLLO = process.env.URL_API_DESARROLLO;
+const ACCES_TOKEN_MP = process.env.ACCES_TOKEN_MP;
+
 const client = new MercadoPagoConfig({
-  accessToken: process.env.ACCES_TOKEN_MP,
+  accessToken: ACCES_TOKEN_MP,
 });
 const preference = new Preference(client);
-
-const { MOCKE_ARANCELES } = require("../models/aranceles");
+const payment = new Payment(client);
 
 const getAllAranceles = () => {
   return MOCKE_ARANCELES;
 };
+
 const createOrderService = async (body) => {
   try {
     const result = await preference.create({
@@ -57,16 +65,15 @@ const createOrderService = async (body) => {
           },
         ],
         back_urls: {
-          success: "http://localhost:3001/api/aranceles/success",
-          pending: "http://localhost:3001/api/aranceles/pending",
-          failure: "http://localhost:3001/api/aranceles/failure",
+          success: `${URL_API_MP}/api/aranceles/success`,
+          pending: `${URL_API_MP}/api/aranceles/pending`,
+          failure: `${URL_API_MP}/api/aranceles/failure`,
         },
-        notification_url:
-          "https://5558-190-246-234-201.ngrok-free.app/api/aranceles/webhook",
+        // notification_url: `https://c8a7-190-246-234-119.ngrok-free.app/api/aranceles/webhook`,
+        notification_url: `${URL_API_MP}/api/aranceles/webhook`,
       },
     });
 
-    console.log(result);
     return result.init_point;
   } catch (error) {
     console.log(error);
@@ -74,13 +81,11 @@ const createOrderService = async (body) => {
   }
 };
 
-const createOrderWebHookService = async (payment) => {
+const createOrderWebHookService = async (pay) => {
   try {
-    if (payment.type === "payment") {
-      const data = await preference.get({ preferenceId: payment["data.id"] });
-      //const data = await preference.search();
-      console.log("PAYMENT", data);
-      //Guardar en base de datos
+    if (pay.type === "payment") {
+      const data = await payment.get({ id: pay["data.id"] });
+      //Guardar data en DB
     }
     return "OK";
   } catch (error) {
@@ -89,4 +94,25 @@ const createOrderWebHookService = async (payment) => {
   }
 };
 
-module.exports = { createOrderService, createOrderWebHookService };
+const createOrderSuccess = async (pay) => {
+  try {
+    const data = await payment.get({ id: pay.payment_id });
+    await senMail(data.order);
+
+    const response = {
+      order: data.order,
+      payer: data.payer,
+      payment_method: data.payment_method,
+    };
+    return response;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+module.exports = {
+  createOrderService,
+  createOrderWebHookService,
+  createOrderSuccess,
+};

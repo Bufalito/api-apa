@@ -1,12 +1,13 @@
 require("dotenv").config();
 const axios = require("axios");
+const { createOrderService } = require("../services/aranceles-paypal");
+const { senMail } = require("../config/mailer");
 
 const URL_FRONT_DESARROLLO = process.env.URL_FRONT_DESARROLLO;
+const URL_FRONT_ORIGIN = process.env.URL_FRONT_ORIGIN;
 const paypal_secret = process.env.PAYPAL_API_SECRET;
 const paypal_client = process.env.PAYPAL_API_CLIENT;
 const paypal_api = process.env.PAYPAL_API;
-
-const { createOrderService } = require("../services/aranceles-paypal");
 
 const createOrderController = async (req, res) => {
   const { body } = req;
@@ -27,6 +28,7 @@ const createOrderController = async (req, res) => {
       },
     }
   );
+
   const response = await axios.post(`${paypal_api}/v2/checkout/orders`, order, {
     headers: {
       "Content-Type": "application/json",
@@ -55,8 +57,10 @@ const captureOrderController = async (req, res) => {
 
   console.log(response.data); //Esto debo guardarlo en la DB - esta la informacion del usuario
 
+  await senMail(response.data);
+
   res.redirect(
-    `${URL_FRONT_DESARROLLO}checkout?id=${response.data.id}&given_name=${response.data.payer.name.given_name}&surname=${response.data.payer.name.surname}&email=${response.data.payer.email_address}`
+    `${URL_FRONT_ORIGIN}checkout?id=${response.data.id}&given_name=${response.data.payer.name.given_name}&surname=${response.data.payer.name.surname}&email=${response.data.payer.email_address}`
   );
 };
 

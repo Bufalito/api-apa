@@ -21,6 +21,8 @@ const createOrderService = async (body) => {
       user_action: "PAY_NOW",
       return_url: `${URL_API_PAYPAL}/capture-order`,
       cancel_url: `${URL_API_PAYPAL}/cancel-order`,
+      /*   return_url: `http://localhost:3001/api/aranceles-paypal/capture-order`,
+      cancel_url: `http://localhost:3001/api/aranceles-paypal/cancel-order`, */
     },
   };
 
