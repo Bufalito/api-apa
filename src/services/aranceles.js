@@ -65,12 +65,12 @@ const createOrderService = async (body) => {
           },
         ],
         back_urls: {
-          success: `${URL_API_MP}/api/aranceles/success`,
-          pending: `${URL_API_MP}/api/aranceles/pending`,
-          failure: `${URL_API_MP}/api/aranceles/failure`,
+          success: `${URL_API_MP}/success`,
+          pending: `${URL_API_MP}/pending`,
+          failure: `${URL_API_MP}/failure`,
         },
         // notification_url: `https://c8a7-190-246-234-119.ngrok-free.app/api/aranceles/webhook`,
-        notification_url: `${URL_API_MP}/api/aranceles/webhook`,
+        notification_url: `${URL_API_MP}/webhook`,
       },
     });
 
