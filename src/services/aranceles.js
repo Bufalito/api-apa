@@ -3,6 +3,7 @@ const { MOCKE_ARANCELES } = require("../models/aranceles");
 const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const { senMail } = require("../config/mailer");
 
+//const URL_API_MP = process.env.URL_API_MP;
 const URL_API_MP = process.env.URL_API_MP;
 const URL_API_DESARROLLO = process.env.URL_API_DESARROLLO;
 const ACCES_TOKEN_MP = process.env.ACCES_TOKEN_MP;
@@ -62,6 +63,7 @@ const createOrderService = async (body) => {
             quantity: 1,
             unit_price: body.valor,
             currency_id: body.moneda,
+            description: body.concepto,
           },
         ],
         back_urls: {
@@ -69,11 +71,10 @@ const createOrderService = async (body) => {
           pending: `${URL_API_MP}/pending`,
           failure: `${URL_API_MP}/failure`,
         },
-        // notification_url: `https://c8a7-190-246-234-119.ngrok-free.app/api/aranceles/webhook`,
         notification_url: `${URL_API_MP}/webhook`,
       },
     });
-
+    console.log(result.init_point);
     return result.init_point;
   } catch (error) {
     console.log(error);
@@ -85,7 +86,6 @@ const createOrderWebHookService = async (pay) => {
   try {
     if (pay.type === "payment") {
       const data = await payment.get({ id: pay["data.id"] });
-      //Guardar data en DB
     }
     return "OK";
   } catch (error) {
@@ -97,12 +97,12 @@ const createOrderWebHookService = async (pay) => {
 const createOrderSuccess = async (pay) => {
   try {
     const data = await payment.get({ id: pay.payment_id });
-    await senMail(data.order);
 
     const response = {
       order: data.order,
       payer: data.payer,
       payment_method: data.payment_method,
+      items: data.additional_info.items,
     };
     return response;
   } catch (error) {

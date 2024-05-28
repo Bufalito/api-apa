@@ -6,6 +6,9 @@ const {
   createOrderSuccess,
 } = require("../services/aranceles");
 
+const compraSchema = require("../models/comprasMP");
+const { senMail } = require("../config/mailer");
+
 const { Transporter } = require("../config/mailer");
 const URL_FRONT_DESARROLLO = process.env.URL_FRONT_DESARROLLO;
 const URL_FRONT_ORIGIN = process.env.URL_FRONT_ORIGIN;
@@ -18,7 +21,16 @@ const createOrderController = async (req, res) => {
 
 const succesOrderController = async (req, res) => {
   const payment = req.query;
+
   const response = await createOrderSuccess(payment);
+  const savedCompra = await compraSchema(response).save();
+
+  const responseEmail = {
+    id: response.order.id,
+    description: response.items[0].description,
+    user_email: response.payer.email,
+  };
+  senMail(responseEmail);
 
   res.redirect(
     `${URL_FRONT_ORIGIN}checkout?id=${response.order.id}&given_name=${response.payer.first_name}&surname=${response.payer.last_name}&email=${response.payer.email}`
