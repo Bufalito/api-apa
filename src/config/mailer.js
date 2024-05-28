@@ -82,7 +82,7 @@ const senMail = async (response) => {
 
   await transporter.sendMail({
     from: '"Aqui esta tu entrada" <apainternacional.entradas@gmail.com>', // sender address
-    to: "pablobojanich1@gmail.com", // TODO ==> response.user_email
+    to: `${response.user_email}`, 
     subject: "Aqui esta tu entrada - APA Internacional", // Subject line
     html: msgHtml,
   });

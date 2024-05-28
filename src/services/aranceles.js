@@ -4,7 +4,7 @@ const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const { senMail } = require("../config/mailer");
 
 //const URL_API_MP = process.env.URL_API_MP;
-const URL_API_MP = process.env.URL_API_MP;
+const URL_API_MP = "http://localhost:3002/api/aranceles";
 const URL_API_DESARROLLO = process.env.URL_API_DESARROLLO;
 const ACCES_TOKEN_MP = process.env.ACCES_TOKEN_MP;
 
@@ -13,10 +13,6 @@ const client = new MercadoPagoConfig({
 });
 const preference = new Preference(client);
 const payment = new Payment(client);
-
-const getAllAranceles = () => {
-  return MOCKE_ARANCELES;
-};
 
 const createOrderService = async (body) => {
   try {
@@ -71,7 +67,9 @@ const createOrderService = async (body) => {
           pending: `${URL_API_MP}/pending`,
           failure: `${URL_API_MP}/failure`,
         },
-        notification_url: `${URL_API_MP}/webhook`,
+        auto_return: "approved",
+        //notification_url: `${URL_API_MP}/webhook`,
+        notification_url: `https://57e6-190-246-234-119.ngrok-free.app/api/aranceles/webhook`,
       },
     });
     console.log(result.init_point);

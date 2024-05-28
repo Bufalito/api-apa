@@ -6,7 +6,7 @@ const {
   createOrderSuccess,
 } = require("../services/aranceles");
 
-const compraSchema = require("../models/comprasMP");
+const Order = require("../models/comprasMP");
 const { senMail } = require("../config/mailer");
 
 const { Transporter } = require("../config/mailer");
@@ -23,7 +23,9 @@ const succesOrderController = async (req, res) => {
   const payment = req.query;
 
   const response = await createOrderSuccess(payment);
-  const savedCompra = await compraSchema(response).save();
+  console.log("RESPONSE SUCCESS", response);
+
+  const savedCompra = await Order(response).save();
 
   const responseEmail = {
     id: response.order.id,
@@ -47,6 +49,7 @@ const createOrderWebHookController = async (req, res) => {
   // console.log(req.query); //Obtengo el id lo puedo guardar en la DB
   const payment = req.query;
   const response = await createOrderWebHookService(payment);
+  console.log("HOOK", response);
 
   res.status(204).send({ data: response });
 };
